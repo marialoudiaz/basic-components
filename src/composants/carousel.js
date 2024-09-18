@@ -26,7 +26,8 @@ function Carousel() {
   }, [currentItem]) 
 
   return (
-    <div>
+    <div className='section' style={{display:'flex',flexDirection:'column'}}>
+      <h2>Carousel</h2>
         {currentItem}     
         <button onClick={prev}>Prev</button>
         <button onClick={next}>Next</button>

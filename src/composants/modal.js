@@ -35,7 +35,7 @@ function Modal() {
 
   return (
     <div className='section' style={{display:'flex',flexDirection:'column'}}>
-      
+      <h2>Modal</h2>
       <button onClick={()=>openModal('id-modal-open')}>ouvrir le modal</button>
 
       <div id={elementId}>
