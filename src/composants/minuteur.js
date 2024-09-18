@@ -3,51 +3,92 @@ import '../App.css';
 
 function Minuteur() {
 
-  const [playPause, setPlayPause]= useState(['play','pause']);
+  const [timeRemaining, setTimeRemaining] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const [playPause, setPlayPause]= useState('play');
   
-  const playPauseChange =()=>{
-    setPlayPause()
-  }
-
   //Unités de mesure
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
-  const [days, setDays] = useState(0);
-
-  // Créer une deadline
-  const deadline = '2024-12-31'; // variable doit être une chaine de caractères
-
+  
   //Créer une fonction pour obtenir le temps
   const getTime =()=>{
-    const time = Date.parse(deadline) - Date.now();
-    setDays(Math.floor(time / (1000 * 60 * 60 * 24)));
+    const time = Date.parse(timeRemaining) - Date.now();
     setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
     setMinutes(Math.floor((time / 1000 / 60) % 60));
     setSeconds(Math.floor((time / 1000) % 60));
   }
 
-  // timer will roll after every second's passed
+  //Définir la minuterie
+  const handleChange = (event) => {
+    setInputValue(event.target.value);
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      const inputTime = parseInt(inputValue, 10)*1000; // secondes => millisec
+      setTimeRemaining(inputTime);
+      setInputValue('');
+    }
+  };
+
+  //Play/Pause 
+  const playPauseChange =()=>{
+    setPlayPause((prevState)=> (prevState === 'play' ? 'pause' :'play'));
+  }
+  // Redémarrer le minuteur
+  const restart =()=>{
+    setTimeRemaining(0)
+  }
+
+
+  // Mettre à jour le minuteur
   useEffect(() => {
-    const interval = setInterval(()=> getTime(deadline),1000);
-    return()=> clearInterval(interval);
-  }, []) 
+    let timer;
+    if (playPause === 'play' && timeRemaining > 0) { // gere en meme temps le play/pause par conditionnel
+      timer = setInterval(() => {
+        setTimeRemaining((prevTime) => {
+          const newTime = prevTime - 1000;
+          if (newTime <= 0) {
+            clearInterval(timer);
+            return 0;
+          }
+          return newTime;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [playPause, timeRemaining]);
+
+
+  // Lancer le minuteur dès que l'input est validé
+  useEffect(() => {
+    getTime()
+  }, [timeRemaining]) 
+
 
   return (
     <div className='section' style={{display:'flex',flexDirection:'column'}}>
 
       <div className='box'>
         <h2>Minuteur</h2>
-        {days} {hours}  {minutes}  {seconds}
-        <div className='flex-wrap'>
-          <button><p>+0:30</p></button>
-          <button><p>+1:00</p></button>
-          <button><p>+5:00</p></button>
-        </div>
+        <h3>Timer</h3>
 
+        <>
+          {timeRemaining > 0 
+          ? 
+          ( <div>{timeRemaining/1000}</div>) 
+          :
+          ( <input placeholder="0" value={inputValue} onChange={handleChange} onKeyDown={handleKeyDown}/>)}
+        
+          {timeRemaining <=1 &&(
+            <p>🔥boom</p>
+          )}
+          </>
+         
         <div className='flex-wrap'>
          <button onClick={()=>playPauseChange()}><p>{playPause}</p></button>
-         <button><p>+0:30</p></button>
+         <button onClick={()=>restart()}><p>restart</p></button>
         </div>
       </div>
 

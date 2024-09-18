@@ -41,6 +41,8 @@ function Timer() {
   return (
     <div className='section' style={{display:'flex',flexDirection:'column'}}>
       <h2>Compte à rebours</h2>
+      <h3>Countdown</h3>
+
       <div className='box'>
         <p>Avant 31 dec 2024</p>
         <p>jours</p>{days} <p>heures</p>{hours}  <p>minutes</p>{minutes}  <p>secondes</p>{seconds}

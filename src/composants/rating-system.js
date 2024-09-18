@@ -26,6 +26,8 @@ function RatingSystem() {
   return (
     <div className='section' style={{display:'flex',flexDirection:'column'}}>
 <h2>Système de notation</h2>
+<h3>Rating system</h3>
+
       <div className='stars'> 
       {Array.from({ length: 5 }).map((_, index) => (
           <svg
