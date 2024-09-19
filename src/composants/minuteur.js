@@ -12,25 +12,65 @@ function Minuteur() {
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
   
-  //Créer une fonction pour obtenir le temps
-  const getTime =()=>{
-    const time = Date.parse(timeRemaining) - Date.now();
-    setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
-    setMinutes(Math.floor((time / 1000 / 60) % 60));
-    setSeconds(Math.floor((time / 1000) % 60));
-  }
-
   //Définir la minuterie
   const handleChange = (event) => {
     setInputValue(event.target.value);
   };
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      const inputTime = parseInt(inputValue, 10)*1000; // secondes => millisec
-      setTimeRemaining(inputTime);
-      setInputValue('');
+
+  // Formater l'entrée pour ajouter les deux-points
+  const formatInputValue = (value) => {
+    // Enlever tous les caractères non numériques
+    const cleaned = value.replace(/\D/g, ''); //regex : retirer tous les caractères non numériques de la chaîne d'entrée.
+
+    // Ajouter les deux-points en fonction de la longueur du texte nettoyé
+    if (cleaned.length > 4) {
+      return cleaned.replace(/(\d{2})(\d{2})(\d{2})$/, '$1:$2:$3'); // HHMMSS 
+      // regex : trois groupes de deux chiffres à la fin de la chaîne. (d = digit)
+      // regex : remplace ces groupes par les mêmes chiffres séparés par des ':'
+    } else if (cleaned.length > 2) {
+      return cleaned.replace(/(\d{2})(\d{2})$/, '$1:$2'); // MMSS
+    } else {
+      return cleaned; // SS
     }
   };
+
+  // Gérer l'entrée de l'utilisateur
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      const formattedInput = formatInputValue(inputValue);
+      const timeParts = formattedInput.split(':');
+      let totalMilliseconds = 0;
+
+      if (timeParts.length === 3){ // HH:MM:SS
+        const inputHours = parseInt(timeParts[0], 10) || 0;
+        const inputMinutes = parseInt (timeParts[1], 10) || 0;
+        const inputSeconds = parseInt(timeParts[2], 10) || 0;
+
+        totalMilliseconds = (inputHours * 60 * 60 * 1000) + (inputMinutes * 60 * 1000) + (inputSeconds * 1000);
+      } else if (timeParts.length === 2) { // MM:SS
+        const inputMinutes = parseInt (timeParts[1], 10) || 0;
+        const inputSeconds = parseInt(timeParts[2], 10) || 0;
+
+        totalMilliseconds = (inputMinutes * 60 * 1000) + (inputSeconds * 1000);
+      } else if (timeParts.length === 1){ //ss
+        const inputSeconds = parseInt(timeParts[0], 10) || 0;
+
+        totalMilliseconds = inputSeconds * 1000;
+      }
+
+      setTimeRemaining(totalMilliseconds);
+      setInputValue('');
+  }
+};
+// const inputTime = parseInt(inputValue, 10)*1000; // secondes => millisec
+
+  //Créer une fonction pour obtenir le temps
+  const getTime =()=>{
+    const time = timeRemaining;
+    setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
+    setMinutes(Math.floor((time / 1000 / 60) % 60));
+    setSeconds(Math.floor((time / 1000) % 60));
+  }
 
   //Play/Pause 
   const playPauseChange =()=>{
@@ -40,7 +80,6 @@ function Minuteur() {
   const restart =()=>{
     setTimeRemaining(0)
   }
-
 
   // Mettre à jour le minuteur
   useEffect(() => {
@@ -60,7 +99,6 @@ function Minuteur() {
     return () => clearInterval(timer);
   }, [playPause, timeRemaining]);
 
-
   // Lancer le minuteur dès que l'input est validé
   useEffect(() => {
     getTime()
@@ -77,10 +115,10 @@ function Minuteur() {
         <>
           {timeRemaining > 0 
           ? 
-          ( <div>{timeRemaining/1000}</div>) 
+          ( <div>{`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}</div>) 
           :
-          ( <input placeholder="0" value={inputValue} onChange={handleChange} onKeyDown={handleKeyDown}/>)}
-        
+          ( <input placeholder="hh:mm:ss" value={inputValue} onChange={handleChange} onKeyDown={handleKeyDown}/>)}
+        {/* .padSart(n,x)remplir une chaîne de caractères jusqu'à une longueur spécifique */}
           {timeRemaining <=1 &&(
             <p>🔥boom</p>
           )}
